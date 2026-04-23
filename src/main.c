@@ -13,7 +13,8 @@ int main(int argc, char *argv[]) {
     JsonValue *value = jsonCreateString("Matheus");
     JsonObject *obj = jsonCreateObject(1);
 
-    jsonObjectSet(obj, 0, "name", value);
+    jsonObjectSetKey(obj, 0, "name");
+    jsonObjectSetValue(obj, 0, value);
 
     JsonValue *root = jsonCreateRoot(obj);
 

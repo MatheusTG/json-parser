@@ -28,8 +28,11 @@ JsonObject* jsonCreateObject(int amount) {
     return obj;
 }
 
-void jsonObjectSet(JsonObject *obj, int index, char *key, JsonValue *value) {
+void jsonObjectSetKey(JsonObject *obj, int index, char *key) {
     obj->pairs[index].key = key;
+}
+
+void jsonObjectSetValue(JsonObject *obj, int index, JsonValue *value) {
     obj->pairs[index].value = value;
 }
 

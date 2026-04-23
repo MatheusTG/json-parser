@@ -45,7 +45,8 @@ struct JsonValue {
 // funções
 JsonValue* jsonCreateString(const char *str);
 JsonObject* jsonCreateObject(int amount);
-void jsonObjectSet(JsonObject *obj, int index, char *key, JsonValue *value);
+void jsonObjectSetKey(JsonObject *obj, int index, char *key);
+void jsonObjectSetValue(JsonObject *obj, int index, JsonValue *value);
 JsonValue* jsonCreateRoot(JsonObject *obj);
 
 #endif
