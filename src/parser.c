@@ -19,14 +19,12 @@ void cleanCurrentString() {
 }
 
 JsonValue* parseObject(JsonValue *currentJson, const char character) {
-  if (!currentJson) {
-    return jsonCreateRoot(jsonCreateObject(0));
-  }
-  
   if (character == '{') {
-    objectOpen = jsonCreateObject(0);
-  } else if (character == '}') {
-    objectOpen = NULL;
+    return currentJson;
+  }
+
+  if (character == '}') {
+    return currentJson;
   }
 
   return currentJson;
@@ -39,6 +37,7 @@ JsonValue* parseStringChar(JsonValue *currentJson, const char character) {
     currentString[currentLength + 1] = '\0';
     currentLength++;
   }
+
   return currentJson;
 }
 
@@ -73,11 +72,11 @@ JsonValue* parseChar(JsonValue *currentJson, const char character) {
       return parseString(currentJson);
     case ':':
       return currentJson;
+    case ',':
+      return currentJson;
     default:
       return parseStringChar(currentJson, character);
   }
-
-  return NULL;
 }
 
 void initParser() {
@@ -90,6 +89,10 @@ void initParser() {
 }
 
 JsonValue* parse(const char *json, int begin, JsonValue *currentJson) {
+  if (!currentJson) {
+    currentJson = jsonCreateRoot(jsonCreateObject(0));
+  }
+
   while (json[begin] != '\0') {
     currentJson = parseChar(currentJson, json[begin]);
     begin++;
