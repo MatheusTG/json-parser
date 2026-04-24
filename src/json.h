@@ -1,8 +1,9 @@
 #ifndef JSON_H
-#define JSON_H
+#define JSON_H 
 
-#include <stddef.h>
-
+/* =========================
+   Tipos de JSON
+   ========================= */
 typedef enum {
     JSON_NULL,
     JSON_BOOLEAN,
@@ -12,16 +13,21 @@ typedef enum {
     JSON_OBJECT
 } JsonType;
 
+/* Forward declaration */
 typedef struct JsonValue JsonValue;
 
+/* =========================
+   Estruturas
+   ========================= */
 typedef struct {
     char *key;
     JsonValue *value;
 } JsonPair;
 
 typedef struct {
-    JsonPair *pairs;
     int count;
+    int capacity;
+    JsonPair *pairs;
 } JsonObject;
 
 typedef struct {
@@ -42,11 +48,19 @@ struct JsonValue {
     };
 };
 
-// funções
+/* =========================
+   Funções
+   ========================= */
 JsonValue* jsonCreateString(const char *str);
 JsonObject* jsonCreateObject(int amount);
+
 void jsonObjectSetKey(JsonObject *obj, int index, char *key);
 void jsonObjectSetValue(JsonObject *obj, int index, JsonValue *value);
+
 JsonValue* jsonCreateRoot(JsonObject *obj);
 
-#endif
+
+void jsonPrintObject(JsonObject *obj);
+void jsonPrint(JsonValue *value) ;
+
+#endif /* JSON_H */
