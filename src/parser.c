@@ -41,20 +41,28 @@ JsonValue* parseStringChar(JsonValue *currentJson, const char character) {
   return currentJson;
 }
 
+JsonValue* setValueInCurrentJson(JsonValue *currentJson, JsonValue *value) {
+  jsonObjectSetValue(currentJson->object, currentJson->object->count, value);
+  currentJson->object->count += 1;
+  hasEmptyKey = 0;
+  cleanCurrentString();
+  return currentJson;
+}
+
+JsonValue* setKeyInCurrentJson(JsonValue *currentJson) {
+  jsonObjectSetKey(currentJson->object, currentJson->object->count, strdup(currentString));
+  hasEmptyKey = 1;
+  cleanCurrentString();
+  return currentJson;
+}
+
 JsonValue* parseString(JsonValue *currentJson) {
   if (!isStringActive) {
     isStringActive = 1;
   } else {
     isStringActive = 0;
     if (hasEmptyKey) {
-      jsonObjectSetValue(currentJson->object, currentJson->object->count, jsonCreateString(strdup(currentString)));
-      currentJson->object->count += 1;
-      cleanCurrentString();
-      hasEmptyKey = 0;
-    } else {
-      jsonObjectSetKey(currentJson->object, currentJson->object->count, strdup(currentString));
-      cleanCurrentString();
-      hasEmptyKey = 1;
+      setValueInCurrentJson(currentJson, jsonCreateString(strdup(currentString)));
     }
   }
   return currentJson;
@@ -71,7 +79,7 @@ JsonValue* parseChar(JsonValue *currentJson, const char character) {
     case '"':
       return parseString(currentJson);
     case ':':
-      return currentJson;
+      return setKeyInCurrentJson(currentJson);
     case ',':
       return currentJson;
     default:

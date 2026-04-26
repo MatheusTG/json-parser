@@ -29,6 +29,7 @@ JsonObject* jsonCreateObject(int amount) {
     obj->pairs = malloc(sizeof(JsonPair) * amount);
     return obj;
 }
+
 static void jsonObjectEnsureCapacity(JsonObject *obj, int index) {
     if (index >= obj->capacity) {
         obj->pairs = realloc(obj->pairs, sizeof(JsonPair) * (index + 1));
