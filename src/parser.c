@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include "json.h"
 
 JsonObject *objectOpen = NULL;
@@ -20,6 +19,9 @@ void cleanCurrentString() {
 
 JsonValue* parseObject(JsonValue *currentJson, const char character) {
   if (character == '{') {
+    if (!currentJson->type) {
+      currentJson->type = JSON_OBJECT;
+    }
     return currentJson;
   }
 
@@ -50,19 +52,32 @@ JsonValue* setValueInCurrentJson(JsonValue *currentJson, JsonValue *value) {
 }
 
 JsonValue* setKeyInCurrentJson(JsonValue *currentJson) {
-  jsonObjectSetKey(currentJson->object, currentJson->object->count, strdup(currentString));
+  jsonObjectSetKey(currentJson->object, currentJson->object->count, currentString);
   hasEmptyKey = 1;
   cleanCurrentString();
   return currentJson;
 }
 
 JsonValue* parseString(JsonValue *currentJson) {
+  if (currentJson->type == JSON_NULL) {
+    currentJson->type = JSON_STRING;
+  }
+
+  isStringActive = !isStringActive;
+
   if (!isStringActive) {
-    isStringActive = 1;
-  } else {
-    isStringActive = 0;
-    if (hasEmptyKey) {
-      setValueInCurrentJson(currentJson, jsonCreateString(strdup(currentString)));
+    switch (currentJson->type) {
+      case JSON_STRING:
+        currentJson->string = currentString;
+        break;
+      case JSON_OBJECT:
+        if (hasEmptyKey) {
+          setValueInCurrentJson(currentJson, jsonCreateString(currentString));
+        }
+        break;
+      default:
+        fprintf(stderr, "invalid JSON type for string value \n");
+        break;
     }
   }
   return currentJson;

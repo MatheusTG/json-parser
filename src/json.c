@@ -1,4 +1,5 @@
 #include "json.h"
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -18,7 +19,7 @@ static JsonObject* initJsonObject() {
 JsonValue* jsonCreateString(const char *str) {
     JsonValue *value = initJsonValue();
     value->type = JSON_STRING;
-    value->string = (char *)str;
+    value->string = strdup(str);
     return value;
 }
 
@@ -45,7 +46,7 @@ static void jsonObjectEnsureCapacity(JsonObject *obj, int index) {
 
 void jsonObjectSetKey(JsonObject *obj, int index, char *key) {
     jsonObjectEnsureCapacity(obj, index);
-    obj->pairs[index].key = key;
+    obj->pairs[index].key = strdup(key);
 }
 
 void jsonObjectSetValue(JsonObject *obj, int index, JsonValue *value) {
@@ -55,7 +56,7 @@ void jsonObjectSetValue(JsonObject *obj, int index, JsonValue *value) {
 
 JsonValue* jsonCreateRoot(JsonObject *obj) {
     JsonValue *root = malloc(sizeof(JsonValue));
-    root->type = JSON_OBJECT;
+    root->type = JSON_NULL;
     root->object = obj;
     return root;
 }
