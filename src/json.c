@@ -1,7 +1,8 @@
 #include "json.h"
-#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <stdbool.h>
 
 static JsonValue* initJsonValue() {
     JsonValue *value = malloc(sizeof(JsonValue));
@@ -20,6 +21,13 @@ JsonValue* jsonCreateString(const char *str) {
     JsonValue *value = initJsonValue();
     value->type = JSON_STRING;
     value->string = strdup(str);
+    return value;
+}
+
+JsonValue* jsonCreateBoolean(bool val) {
+    JsonValue *value = initJsonValue();
+    value->type = JSON_BOOLEAN;
+    value->boolean = val;
     return value;
 }
 
@@ -87,6 +95,12 @@ void jsonPrintObject(JsonObject *obj) {
                 printf("\"%s\"", pair.value->string);
             } else if (pair.value->type == JSON_OBJECT) {
                 jsonPrintObject(pair.value->object);
+            } else if (pair.value->type == JSON_BOOLEAN) {
+                if (pair.value->boolean) {
+                    printf("true");
+                } else {
+                    printf("false");
+                }
             } else {
                 printf("null");
             }

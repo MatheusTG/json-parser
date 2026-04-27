@@ -1,6 +1,8 @@
 #ifndef JSON_H
 #define JSON_H 
 
+#include <stdbool.h>
+
 /* =========================
    Tipos de JSON
    ========================= */
@@ -41,7 +43,7 @@ struct JsonValue {
     union {
         double number;
         char *string;
-        int boolean;
+        bool boolean;
 
         JsonArray *array;
         JsonObject *object;
@@ -52,6 +54,7 @@ struct JsonValue {
    Funções
    ========================= */
 JsonValue* jsonCreateString(const char *str);
+JsonValue* jsonCreateBoolean(bool val);
 JsonObject* jsonCreateObject(int amount);
 
 void jsonObjectSetKey(JsonObject *obj, int index, char *key);
