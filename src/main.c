@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
     
     initParser();
     JsonValue *result = parse(conteudo, 0, NULL);
+    
     jsonPrint(result);
 
     return 0;

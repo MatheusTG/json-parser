@@ -30,9 +30,6 @@ void cleanNonStringChars() {
 
 JsonValue* parseObject(JsonValue *currentJson, const char character) {
   if (character == '{') {
-    if (!currentJson->type) {
-      currentJson->type = JSON_OBJECT;
-    }
     return currentJson;
   }
 
@@ -52,19 +49,38 @@ JsonValue* setValueInCurrentJson(JsonValue *currentJson, JsonValue *value) {
 }
 
 JsonValue* testAndSetNonStringValue(JsonValue *currentJson) {
-    if (strcmp(nonStringChars, "true") == 0) {
+    if (nonStringChars && strcmp(nonStringChars, "true") == 0) {
       setValueInCurrentJson(currentJson, jsonCreateBoolean(true));
-    } else if (strcmp(nonStringChars, "false") == 0) {
+    } else if (nonStringChars && strcmp(nonStringChars, "false") == 0) {
       setValueInCurrentJson(currentJson, jsonCreateBoolean(false));
     } else{
       fprintf(stderr, "Invalid JSON syntax error\n");
+      cleanNonStringChars();
+      return NULL;
     }
     cleanNonStringChars();
     return currentJson;
 }
 
-JsonValue* parseBoolean(JsonValue *currentJson, const char character) {
-  nonStringChars = realloc(nonStringChars, nonStringCharsLength + 2);
+JsonValue* parseNonStringValue(JsonValue *currentJson, const char character) {
+  if (!nonStringChars) {
+    nonStringChars = malloc(1);
+    if (!nonStringChars) {
+      fprintf(stderr, "Memory allocation error\n");
+      return NULL;
+    }
+    nonStringChars[0] = '\0';
+  }
+
+  char *tmp = realloc(nonStringChars, nonStringCharsLength + 2);
+  if (!tmp) {
+    fprintf(stderr, "Memory allocation failed\n");
+    free(nonStringChars);
+    return NULL;
+  }
+  nonStringChars = tmp;
+
+
   nonStringChars[nonStringCharsLength] = character;
   nonStringChars[nonStringCharsLength + 1] = '\0';
   nonStringCharsLength++;   
@@ -73,7 +89,23 @@ JsonValue* parseBoolean(JsonValue *currentJson, const char character) {
 }
 
 JsonValue* parseStringChar(JsonValue *currentJson, const char character) {
-  currentString = realloc(currentString, currentLength + 2);
+  if (!currentString) {
+    currentString = malloc(1);
+    if (!currentString) {
+      fprintf(stderr, "Memory allocation error\n");
+      return NULL;
+    }
+    currentString[0] = '\0';
+  }
+  
+  char *tmp = realloc(currentString, currentLength + 2);
+  if (!tmp) {
+    fprintf(stderr, "Memory allocation failed\n");
+    free(currentString);
+    return NULL;
+  }
+  currentString = tmp;
+  
   currentString[currentLength] = character;
   currentString[currentLength + 1] = '\0';
   currentLength++;
@@ -89,16 +121,12 @@ JsonValue* setKeyInCurrentJson(JsonValue *currentJson) {
 }
 
 JsonValue* parseString(JsonValue *currentJson) {
-  if (currentJson->type == JSON_NULL) {
-    currentJson->type = JSON_STRING;
-  }
-
   isStringActive = !isStringActive;
 
   if (!isStringActive) {
     switch (currentJson->type) {
       case JSON_STRING:
-        currentJson->string = currentString;
+        currentJson->string = strdup(currentString);
         break;
       case JSON_OBJECT:
         if (hasEmptyKey) {
@@ -107,12 +135,23 @@ JsonValue* parseString(JsonValue *currentJson) {
         break;
       default:
         fprintf(stderr, "invalid JSON type for string value \n");
+        return NULL;
     }
   }
   return currentJson;
 }
 
 JsonValue* parseChar(JsonValue *currentJson, const char character) {
+  if (currentJson->type == JSON_NULL) {
+    if (character == '{') {
+      currentJson->type = JSON_OBJECT;
+    } else if (character == '"') {
+      currentJson->type = JSON_STRING;
+    } else if (character == 't' || character == 'f') {
+      currentJson->type = JSON_BOOLEAN;
+    }
+  }
+
   if (!isStringActive) {
     if (character == ' ' || character == '\n' || character == '\t') return currentJson;
     
@@ -120,21 +159,21 @@ JsonValue* parseChar(JsonValue *currentJson, const char character) {
       case '{':
         return parseObject(currentJson, character);
       case '}':
-        if (nonStringChars) testAndSetNonStringValue(currentJson); 
+        if (nonStringCharsLength > 0) return testAndSetNonStringValue(currentJson);
         return parseObject(currentJson, character);
       case '"':
         return parseString(currentJson);
       case ':':
         return setKeyInCurrentJson(currentJson);
       case ',':
-        if (nonStringChars) testAndSetNonStringValue(currentJson); 
+        if (nonStringCharsLength > 0) return testAndSetNonStringValue(currentJson);
         return currentJson;
       default:
         if (hasEmptyKey) {
-          parseBoolean(currentJson, character);
-          return currentJson;
+          return parseNonStringValue(currentJson, character);
         }
         fprintf(stderr, "Invalid JSON syntax error\n");
+        return NULL;
     }
   } else {
     if (character == '"') {
@@ -163,6 +202,7 @@ JsonValue* parse(const char *json, int begin, JsonValue *currentJson) {
   while (json[begin] != '\0') {
     currentJson = parseChar(currentJson, json[begin]);
     begin++;
+    if (!currentJson) break;
   }
 
   return currentJson;
