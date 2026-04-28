@@ -16,9 +16,8 @@ int main(int argc, char *argv[]) {
 
     int len = strlen(conteudo);
     
-    conteudo[len] = '\0',
+    conteudo[len] = '\0';
     
-    initParser();
     JsonValue *result = parse(conteudo, 0, NULL);
     
     jsonPrint(result);

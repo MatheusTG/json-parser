@@ -63,6 +63,11 @@ JsonValue* testAndSetNonStringValue(JsonValue *currentJson) {
 }
 
 JsonValue* parseNonStringValue(JsonValue *currentJson, const char character) {
+  if (nonStringCharsLength + 1 >= 6) {
+    fprintf(stderr, "Invalid JSON syntax error\n");
+    return NULL;
+  }
+
   if (!nonStringChars) {
     nonStringChars = malloc(1);
     if (!nonStringChars) {
@@ -183,15 +188,6 @@ JsonValue* parseChar(JsonValue *currentJson, const char character) {
   }
 
   return currentJson;
-}
-
-void initParser() {
-  currentString = malloc(1);
-  if (!currentString) {
-    fprintf(stderr, "Memory allocation error\n");
-    exit(1);
-  }
-  currentString[0] = '\0';
 }
 
 JsonValue* parse(const char *json, int begin, JsonValue *currentJson) {
