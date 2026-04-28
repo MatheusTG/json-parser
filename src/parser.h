@@ -17,6 +17,10 @@ extern bool hasEmptyKey;
 extern char *nonStringChars;
 extern int nonStringCharsLength;
 
+extern char *expectedNonStringChars;
+
+extern bool isNonStringCharsADigit;
+
 /* =========================
    Utility functions
    ========================= */
